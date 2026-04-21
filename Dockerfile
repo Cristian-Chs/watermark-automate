@@ -7,7 +7,7 @@ WORKDIR /app
 # Instalar dependencias del sistema necesarias para Pillow
 RUN apt-get update && apt-get install -y \
     libopenjp2-7 \
-    libtiff5 \
+    libtiff6 \
     && rm -rf /var/lib/apt/lists/*
 
 # Copiar archivos de requerimientos e instalar dependencias de Python

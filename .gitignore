@@ -1,0 +1,24 @@
+# Entorno Virtual
+.venv/
+env/
+venv/
+ENV/
+
+# Variables de Entorno (Secretos)
+.env
+
+# Python (Archivos temporales)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# IDEs y otros
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.swo
+
+# Imágenes temporales (si las hubiera)
+*.tmp

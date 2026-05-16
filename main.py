@@ -1,7 +1,7 @@
 import io
 import logging
 import os
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 from dotenv import load_dotenv
 
 from telegram import Update
@@ -91,7 +91,20 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         new_logo_h = int(new_logo_w * aspect_ratio)
         logo_resized = logo.resize((new_logo_w, new_logo_h), Image.Resampling.LANCZOS)
         
-        # 5. Estampar en cuadrícula 4x4
+        # 5. Preparar texto de marca de agua
+        watermark_text = "@kinderstorepf"
+        font_size = max(12, int(user_w * 0.022))  # Tamaño dinámico según el ancho
+        try:
+            font = ImageFont.truetype("arial.ttf", font_size)
+        except (IOError, OSError):
+            try:
+                font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", font_size)
+            except (IOError, OSError):
+                font = ImageFont.load_default()
+        
+        draw = ImageDraw.Draw(user_img)
+        
+        # 6. Estampar en cuadrícula 4x4 (logo + texto)
         for row in range(4):
             for col in range(4):
                 cell_center_x = (user_w // 4) * col + (user_w // 8)
@@ -99,6 +112,16 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 pos_x = cell_center_x - (new_logo_w // 2)
                 pos_y = cell_center_y - (new_logo_h // 2)
                 user_img.paste(logo_resized, (pos_x, pos_y), logo_resized)
+                
+                # Dibujar texto debajo del logo
+                bbox = draw.textbbox((0, 0), watermark_text, font=font)
+                text_w = bbox[2] - bbox[0]
+                text_x = cell_center_x - (text_w // 2)
+                text_y = pos_y + new_logo_h + 4
+                # Sombra sutil para legibilidad
+                draw.text((text_x + 1, text_y + 1), watermark_text, font=font, fill=(0, 0, 0, 100))
+                # Texto blanco semi-transparente
+                draw.text((text_x, text_y), watermark_text, font=font, fill=(255, 255, 255, 200))
         
         # 6. Preparar envío
         output = io.BytesIO()
